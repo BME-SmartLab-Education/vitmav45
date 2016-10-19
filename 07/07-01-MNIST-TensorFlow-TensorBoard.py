@@ -17,7 +17,7 @@ mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
 
 import tensorflow as tf
 
-# a log fileoknak a directorik létrehozása, ha még nem léteznek
+# a log fileoknak a könyvtárak létrehozása, ha még nem léteznek
 # ha léteznek, akkor a korábbiakat letörli
 summaries_dir='tensorboard'
 if tf.gfile.Exists(summaries_dir):
@@ -25,16 +25,14 @@ if tf.gfile.Exists(summaries_dir):
 tf.gfile.MakeDirs(summaries_dir)
 
 sess = tf.Session()
-sess = tf.InteractiveSession()
-#sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
+#sess = tf.InteractiveSession()
 
 # bemenet és kimenet definiálása
 with tf.name_scope('input'):
   x = tf.placeholder(tf.float32, shape=[None, 784])
   y_ = tf.placeholder(tf.float32, shape=[None, 10])
 
-# változók inicializálása. Mivel ReLU-t fogunk használni, ezért fontos, hogy pozitív érétkük legyen.
-
+# súlyok és bias létrehozása és inicializálása
 def weight_variable(shape):
   initial = tf.truncated_normal(shape, stddev=0.1)
   return tf.Variable(initial)
@@ -43,8 +41,7 @@ def bias_variable(shape):
   initial = tf.constant(0.1, shape=shape)
   return tf.Variable(initial)
 
-# konvolúciós és max-pool rétegek inicializálása
-
+# konvolúciós és max-pool rétegek létrehozása
 def conv2d(x, W):
   return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
 
@@ -54,7 +51,8 @@ def max_pool_2x2(x):
 
 # háló architektúrájának összerakása
 
-# a TensorBoard számára rögzítünk számos adatot a megadott változóról
+# a következő függvénnyel fogjuk a TensorBoard számára 
+# rögzíteni a paraméterben átadott változóról az adatokat
 def variable_summaries(var, name):
   with tf.name_scope('summaries'):
     mean = tf.reduce_mean(var)
@@ -142,13 +140,13 @@ with tf.name_scope('fully_connected_2'):
     tf.histogram_summary('fc2/reshape', h_pool2_flat)
 
 y_conv = tf.matmul(h_fc1_drop, W_fc2) + b_fc2
-#y_conv=tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
-'''
-Nem használunk softmax+cross_enthropy-t, mert numerikusan instabil. 
-Ehelyett tf.nn.softmax_cross_entropy_with_logits használunk, ami batch-enként átlagolja
-a kimenetet.
-'''
-#cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y_conv), reduction_indices=[1]))
+# Nem használunk softmax+cross_enthropy-t, mert numerikusan instabil. 
+# Ehelyett tf.nn.softmax_cross_entropy_with_logits használunk, ami batch-enként átlagolja
+# a kimenetet. Ebben a softmax benne van, ezért nem kell külön rétegként definiálni.
+# (Softmax+cross entropy esetén így nézne ki:
+#    y_conv=tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
+#    cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y_conv), reduction_indices=[1]))
+# )
 
 # tanítás és tesztelés
 with tf.name_scope('cross_entropy'):
@@ -175,21 +173,21 @@ test_writer = tf.train.SummaryWriter(summaries_dir + '/test')
 print(sess.run(tf.initialize_all_variables()))
 for i in range(1000):
   batch = mnist.train.next_batch(50)
-  # minden 10. epochban rögzítjük a summary-kat a teszt adatokon
+  # minden 10. epochban rögzítjük a summary-kat a teszt adatokon a TensorBoard számára
   if i%10 == 0:
     summary,acc = sess.run([merged, accuracy], feed_dict={x:mnist.test.images, y_:mnist.test.labels, keep_prob: 1.0})
     test_writer.add_summary(summary, i)
     print('Accuracy at epoch %s: %s' % (i, acc))
   else: 
-    # rögzítjük az summary-kat a tanító adatokon
-    if i % 100 == 99:  # minden 100. epochban rögzítjük a tanítás statisztikáit
+    # rögzítjük az summary-kat a tanító adatokon a TensorBoard számára
+    if i % 100 == 99:  # minden 100. epochban rögzítjük a tanítás statisztikáit (ezzel tudjuk majd vizsgálni pl. a terheléseket)
       run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
       run_metadata = tf.RunMetadata()
       summary, _ = sess.run([merged, train_step], feed_dict={x: batch[0], y_: batch[1], keep_prob: 0.5}, options=run_options, run_metadata=run_metadata)
       train_writer.add_run_metadata(run_metadata, 'epoch%03d' % i)
       train_writer.add_summary(summary, i)
       print('Adding run metadata for epoch', i)
-    else: # minden epochban rögzítjük a summary-kat a tanító adatokon
+    else: # minden epochban rögzítjük a summary-kat a tanító adatokon a TensorBoardnak
       summary, _ = sess.run([merged, train_step], feed_dict={x: batch[0], y_: batch[1], keep_prob: 0.5})
       train_writer.add_summary(summary, i)
 

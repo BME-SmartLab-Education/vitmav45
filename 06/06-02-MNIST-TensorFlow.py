@@ -19,8 +19,6 @@ mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
 import tensorflow as tf
 
 sess = tf.Session()
-sess = tf.InteractiveSession()
-#sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
 
 # bemenet és kimenet definiálása
 x = tf.placeholder(tf.float32, shape=[None, 784])

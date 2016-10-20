@@ -7,6 +7,9 @@ Jelen forráskód a Budapesti Műszaki és Gazdaságtudományi Egyetemen tartott
 A tantárgy honlapja: http://smartlab.tmit.bme.hu/oktatas-deep-learning
 Deep Learning kutatás: http://smartlab.tmit.bme.hu/deep-learning
 
+A forráskód a hivatalos TensorFlow dokumentáció alapján készült: 
+https://www.tensorflow.org/versions/r0.11/how_tos/summaries_and_tensorboard/index.html
+
 A forráskódot GPLv3 licensz védi. Újrafelhasználás esetén lehetőség szerint kérejük
 az alábbi szerzőt értesíteni.
 

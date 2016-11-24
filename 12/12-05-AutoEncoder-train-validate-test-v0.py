@@ -51,7 +51,7 @@ import matplotlib.pyplot as plt
 
 # MNIST adatok betöltése
 from tensorflow.examples.tutorials.mnist import input_data
-mnist = input_data.read_data_sets("/tmp/data/", one_hot=True)
+mnist = input_data.read_data_sets("data/", one_hot=True)
 
 # hálózat tanítási paraméterek
 learning_rate = 0.01

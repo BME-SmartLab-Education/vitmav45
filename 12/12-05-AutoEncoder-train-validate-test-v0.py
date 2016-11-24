@@ -175,5 +175,4 @@ with tf.Session(config=config) as sess:
     for i in range(examples_to_show):
         a[0][i].imshow(np.reshape(mnist.test.images[i], (28, 28)))
         a[1][i].imshow(np.reshape(encode_decode[i], (28, 28)))
-    f.show()
     plt.show()

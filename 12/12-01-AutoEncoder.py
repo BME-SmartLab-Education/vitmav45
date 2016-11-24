@@ -128,5 +128,4 @@ with tf.Session(config=config) as sess:
         a[0][i].imshow(np.reshape(mnist.test.images[i], (28, 28)))
         a[1][i].imshow(np.reshape(encode_decode[i], (28, 28)))
     f.show()
-    plt.draw()
-    plt.waitforbuttonpress()
+    plt.show()
